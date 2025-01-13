@@ -27,6 +27,36 @@ for k in (0, 25, 50, 75, 100):
         },
     )
 
+# k-out-of-3 game
+for k in [1, 2, 3]:
+    penalty = -500
+    inspect = -10
+    repair = -20
+
+    action_costs = np.array([0, inspect, repair])
+    payoff = np.zeros((3, 3, 3))
+    for index in np.ndindex(payoff.shape):
+        # action costs
+        payoff[index] = sum(action_costs[list(index)])
+
+        # system costs
+        count = np.count_nonzero(np.array(index) == 2)
+        if count < k:
+            payoff[index] += penalty
+
+    payoff = np.repeat(payoff[np.newaxis, ...], 3, axis=0)
+
+    register(
+        f"{k}-out-of-3-nostate-v0",
+        entry_point="matrixgames.games:MatrixGame",
+        kwargs={
+            "payoff_matrix": payoff,
+            "ep_length": 1000,
+            "last_action_state": False,
+        },
+    )
+
+
 _payoff_trivial = np.array(
     2
     * [
@@ -66,9 +96,9 @@ register(
     },
 )
 
-    # +0 | +3 | +1
+# +0 | +3 | +1
 # -----------------
-# +1 | 1 |  4 |  2 
+# +1 | 1 |  4 |  2
 # +0 | 0 |  3 |  1
 # +2 | 2 |  5 |  3
 
@@ -93,12 +123,12 @@ register(
 )
 
 
-    # +0 | +3
+# +0 | +3
 # -----------
 # +1 | 1 |  4
 # +2 | 2 |  5
 
-    #  +0 | +3
+#  +0 | +3
 # -------------
 # +1 |  0 |  3
 # +2 |  0 |  6
@@ -248,10 +278,12 @@ import matrixgames.aamas2012
 
 for i in range(1, 22):
     _arr = getattr(matrixgames.aamas2012, f"nc{i}")
-    _payoff = np.array([
-        [[_arr[0], _arr[2]], [_arr[4], _arr[6]]],
-        [[_arr[1], _arr[3]], [_arr[5], _arr[7]]],
-    ])
+    _payoff = np.array(
+        [
+            [[_arr[0], _arr[2]], [_arr[4], _arr[6]]],
+            [[_arr[1], _arr[3]], [_arr[5], _arr[7]]],
+        ]
+    )
     register(
         f"nonconflict-{i}-nostate-v0",
         entry_point="matrixgames.games:MatrixGame",
@@ -259,15 +291,17 @@ for i in range(1, 22):
             "payoff_matrix": _payoff,
             "ep_length": 1000,
             "last_action_state": False,
-        }, 
+        },
     )
 
 for i in range(1, 58):
     _arr = getattr(matrixgames.aamas2012, f"c{i}")
-    _payoff = np.array([
-        [[_arr[0], _arr[2]], [_arr[4], _arr[6]]],
-        [[_arr[1], _arr[3]], [_arr[5], _arr[7]]],
-    ])
+    _payoff = np.array(
+        [
+            [[_arr[0], _arr[2]], [_arr[4], _arr[6]]],
+            [[_arr[1], _arr[3]], [_arr[5], _arr[7]]],
+        ]
+    )
     register(
         f"conflict-{i}-nostate-v0",
         entry_point="matrixgames.games:MatrixGame",
@@ -275,5 +309,5 @@ for i in range(1, 58):
             "payoff_matrix": _payoff,
             "ep_length": 1000,
             "last_action_state": False,
-        }, 
+        },
     )

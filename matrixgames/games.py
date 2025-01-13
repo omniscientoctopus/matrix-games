@@ -165,3 +165,27 @@ def create_climbing_game(ep_length, last_action_state=True):
     ]
     game = MatrixGame(payoff, ep_length, last_action_state)
     return game
+
+# k-out-of-3 game
+def create_k_out_of_3_game(k, ep_length, last_action_state=True):
+    assert k in [1, 2, 3]
+
+    penalty = -500
+    inspect = -10
+    repair = -20
+
+    action_costs = np.array([0, inspect, repair])
+    payoff = np.zeros((3, 3, 3))
+    for index in np.ndindex(payoff.shape):
+        # action costs
+        payoff[index] = sum(action_costs[list(index)])
+
+        # system costs
+        count = np.count_nonzero(np.array(index) == 2)
+        if count < k:
+            payoff[index] += penalty
+
+    payoff = np.repeat(payoff[np.newaxis, ...], 3, axis=0)
+
+    game = MatrixGame(payoff, ep_length, last_action_state)
+    return game
